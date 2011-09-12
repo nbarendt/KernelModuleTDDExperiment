@@ -4,6 +4,7 @@
 extern int alloc_chrdev_region(dev_t *dev, unsigned    baseminor,
     unsigned    count,
     const char *    name);
+extern void unregister_chrdev_region(dev_t dev, unsigned count);
 
 #endif
 // copy from 2.6.38-11 - comment out everything with #ifdef

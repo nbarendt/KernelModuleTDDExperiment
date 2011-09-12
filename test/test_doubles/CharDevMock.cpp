@@ -20,3 +20,10 @@ int alloc_chrdev_region(dev_t *dev, unsigned    baseminor,
         .withParameter("name", name)
         .returnValue().getIntValue();
 }
+
+void unregister_chrdev_region(dev_t dev, unsigned count)
+{
+    mock(fs_mock_namespace).actualCall("unregister_chrdev_region")
+        .withParameterOfType("unsigned", "dev", &dev)
+        .withParameterOfType("unsigned", "count", &count);
+}

@@ -5,8 +5,7 @@
 
 extern "C" {
     #include "printkSpy.h"
-    ModuleInitFuncPtr __inittest(void);
-    ModuleExitFuncPtr __exittest(void);
+    #include "main.h"
 }
 
 TEST_GROUP(CharDeviceTest)
@@ -21,6 +20,10 @@ TEST_GROUP(CharDeviceTest)
 
     int initialize_module() {
         return __inittest()();
+    }
+
+    void cleanup_module() {
+        __exittest()();
     }
 
 };
@@ -49,4 +52,15 @@ TEST(CharDeviceTest, ModuleInitFailsIfAllocatesDevRegionFails)
         .withParameter("name", "tddmodule")
         .andReturnValue(1);
     CHECK_EQUAL(1, initialize_module()); 
+}
+
+TEST(CharDeviceTest, ModuleExitReleasesDevRegion)
+{
+    unsigned expected_count = 1;
+    tddmodule_first_dev = 15;
+
+    mock(fs_mock_namespace).expectOneCall("unregister_chrdev_region")
+        .withParameterOfType("unsigned", "dev", &tddmodule_first_dev)
+        .withParameterOfType("unsigned", "count", &expected_count);
+    cleanup_module(); 
 }
