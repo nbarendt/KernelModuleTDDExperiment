@@ -45,6 +45,7 @@ public:
 	MockSupport();
 	virtual ~MockSupport();
 
+	virtual void strictOrder();
 	virtual MockFunctionCall& expectOneCall(const SimpleString& functionName);
 	virtual MockFunctionCall& expectNCalls(int amount, const SimpleString& functionName);
 	virtual MockFunctionCall& actualCall(const SimpleString& functionName);
@@ -90,7 +91,9 @@ public:
 protected:
     virtual MockActualFunctionCall *createActualFunctionCall();
 private:
-
+    static int callOrder_;
+    static int expectedCallOrder_;
+    bool strictOrdering_;
     MockFailureReporter *reporter_;
     MockFailureReporter defaultReporter_;
     MockExpectedFunctionsList expectations_;
@@ -105,9 +108,10 @@ private:
 
     void checkExpectationsOfLastCall();
     bool wasLastCallFulfilled();
-    void failTestWithForUnexpectedCalls();
+    void failTestWithUnexpectedCalls();
+    void failTestWithOutOfOrderCalls();
 
-	MockNamedValue* createAndStoreData(const SimpleString& name);
+	MockNamedValue* retrieveDataFromStore(const SimpleString& name);
 
 	MockSupport* getMockSupport(MockNamedValueListNode* node);
 };

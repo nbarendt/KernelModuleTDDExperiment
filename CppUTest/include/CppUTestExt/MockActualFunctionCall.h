@@ -38,10 +38,11 @@ class MockNamedValue;
 class MockActualFunctionCall : public MockFunctionCall
 {
 public:
-	MockActualFunctionCall(MockFailureReporter* reporter, const MockExpectedFunctionsList& expectations);
+	MockActualFunctionCall(int callOrder, MockFailureReporter* reporter, const MockExpectedFunctionsList& expectations);
 	virtual ~MockActualFunctionCall();
 
 	virtual MockFunctionCall& withName(const SimpleString& name);
+	virtual MockFunctionCall& withCallOrder(int);
 	virtual MockFunctionCall& withParameter(const SimpleString& name, int value);
 	virtual MockFunctionCall& withParameter(const SimpleString& name, double value);
 	virtual MockFunctionCall& withParameter(const SimpleString& name, const char* value);
@@ -80,6 +81,7 @@ protected:
 	virtual void checkStateConsistency(ActualCallState oldState, ActualCallState newState);
 
 private:
+	int callOrder_;
 	MockFailureReporter* reporter_;
 
 	ActualCallState state_;

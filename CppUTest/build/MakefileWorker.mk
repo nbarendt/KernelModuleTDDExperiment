@@ -54,6 +54,32 @@
 #	CPPUTEST_LDFLAGS - Linker flags
 #----------
 
+# Some behavior is weird on some platforms. Need to discover the platform.
+UNAME_OUTPUT = "$(shell uname -a)"
+MACOSX_STR = Darwin
+MINGW_STR = MINGW
+UNKNWOWN_OS_STR = Unknown
+
+ifeq ($(findstring $(MINGW_STR),$(UNAME_OUTPUT)),$(MINGW_STR))
+	UNAME_OS = $(MINGW_STR)
+else ifeq ($(findstring $(MACOSX_STR),$(UNAME_OUTPUT)),$(MACOSX_STR))
+	UNAME_OS = $(MACOSX_STR)
+else
+	UNAME_OS = $(UNKNWOWN_OS_STR)
+endif
+
+#Kludge for mingw, it does not have cc.exe, but gcc.exe will do
+ifeq ($(UNAME_OS),$(MINGW_STR))
+	CC := gcc
+endif
+
+#Kludge for MacOsX gcc compiler on Darwin9 who can't handle pendantic
+
+ifeq ($(UNAME_OS),$(MACOSX_STR))
+ifeq ($(findstring Version 9,$(UNAME_OUTPUT)),Version 9)
+	CPPUTEST_PEDANTIC_ERRORS = N
+endif
+endif
 
 ifndef COMPONENT_NAME
     COMPONENT_NAME = name_this_in_the_makefile
@@ -69,6 +95,11 @@ ifndef CPPUTEST_USE_MEM_LEAK_DETECTION
 	CPPUTEST_USE_MEM_LEAK_DETECTION = Y
 endif
 
+# Use the standard C library
+ifndef CPPUTEST_USE_STD_C_LIB
+	CPPUTEST_USE_STD_C_LIB = Y
+endif
+
 # Use the standard C++ library
 ifndef CPPUTEST_USE_STD_CPP_LIB
 	CPPUTEST_USE_STD_CPP_LIB = Y
@@ -79,9 +110,17 @@ ifndef CPPUTEST_USE_GCOV
 	CPPUTEST_USE_GCOV = N
 endif
 
+ifndef CPPUTEST_PEDANTIC_ERRORS
+	CPPUTEST_PEDANTIC_ERRORS = Y
+endif
+
 # Default warnings
 ifndef CPPUTEST_WARNINGFLAGS
-	CPPUTEST_WARNINGFLAGS = -pedantic-errors -Wall -Wextra -Werror -Wshadow -Wswitch-default -Wswitch-enum -Wconversion
+	CPPUTEST_WARNINGFLAGS =  -Wall -Wextra -Werror -Wshadow -Wswitch-default -Wswitch-enum -Wconversion
+ifeq ($(CPPUTEST_PEDANTIC_ERRORS), Y)
+	CPPUTEST_WARNINGFLAGS += -pedantic-errors
+endif 
+	CPPUTEST_CXX_WARNINGFLAGS = -Woverloaded-virtual
 endif
 
 # Default dir for temporary files (d, o)
@@ -116,6 +155,17 @@ endif
 # --------------------------------------
 # derived flags in the following area
 # --------------------------------------
+
+# Without the C library, we'll need to disable the C++ library and ... 
+ifeq ($(CPPUTEST_USE_STD_C_LIB), N)
+	CPPUTEST_USE_STD_CPP_LIB = N
+	CPPUTEST_USE_MEM_LEAK_DETECTION = N
+	CPPUTEST_CPPFLAGS += -DCPPUTEST_STD_C_LIB_DISABLED
+	CPPUTEST_CPPFLAGS += -nostdinc
+endif
+
+CPPUTEST_CPPFLAGS += -DCPPUTEST_COMPILATION
+
 ifeq ($(CPPUTEST_USE_MEM_LEAK_DETECTION), N)
 	CPPUTEST_CPPFLAGS += -DCPPUTEST_MEM_LEAK_DETECTION_DISABLED
 else
@@ -141,7 +191,7 @@ ifeq ($(CPPUTEST_USE_GCOV), Y)
 endif
 
 CPPUTEST_CPPFLAGS += $(CPPUTEST_WARNINGFLAGS)
-CPPUTEST_CXXFLAGS += $(CPPUTEST_MEMLEAK_DETECTOR_NEW_MACRO_FILE)
+CPPUTEST_CXXFLAGS += $(CPPUTEST_MEMLEAK_DETECTOR_NEW_MACRO_FILE) $(CPPUTEST_CXX_WARNINGFLAGS)
 CPPUTEST_CFLAGS += $(CPPUTEST_MEMLEAK_DETECTOR_MALLOC_MACRO_FILE)
 
 TARGET_MAP = $(COMPONENT_NAME).map.txt
@@ -245,6 +295,9 @@ CPPFLAGS = $(CPPUTEST_CPPFLAGS) $(CPPUTEST_ADDITIONAL_CPPFLAGS)
 CXXFLAGS = $(CPPUTEST_CXXFLAGS) $(CPPUTEST_ADDITIONAL_CXXFLAGS)
 LDFLAGS = $(CPPUTEST_LDFLAGS) $(CPPUTEST_ADDITIONAL_LDFLAGS)
 
+# Some macros for programs to be overridden. For some reason, these are not in Make defaults
+RANLIB = ranlib
+
 # Targets
 
 .PHONY: all
@@ -283,7 +336,7 @@ $(TARGET_LIB): $(OBJ)
 	$(SILENCE)echo Building archive $@
 	$(SILENCE)mkdir -p lib
 	$(SILENCE)$(AR) $(ARFLAGS) $@ $^
-	$(SILENCE)ranlib $@
+	$(SILENCE)$(RANLIB) $@
 
 test: $(TEST_TARGET)
 	$(RUN_TEST_TARGET) | tee $(TEST_OUTPUT)

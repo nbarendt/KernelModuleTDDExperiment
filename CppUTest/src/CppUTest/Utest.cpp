@@ -34,7 +34,7 @@ bool doubles_equal(double d1, double d2, double threshold)
 {
 	if (PlatformSpecificIsNan(d1) || PlatformSpecificIsNan(d2) || PlatformSpecificIsNan(threshold))
 		return false;
-	return PlatformSpecificFabs(d1 - d2) < threshold;
+	return PlatformSpecificFabs(d1 - d2) <= threshold;
 }
 
 /* Sometimes stubs use the CppUTest assertions.
@@ -235,11 +235,11 @@ void Utest::failWith(const TestFailure& failure)
     Utest::getCurrent()->exitCurrentTest();
 }
 
-void Utest::assertTrue(bool condition, const char* conditionString, const char* fileName, int lineNumber)
+void Utest::assertTrue(bool condition, const char * checkString, const char* conditionString, const char* fileName, int lineNumber)
 {
 	getTestResult()->countCheck();
 	if (!condition)
-		failWith(CheckFailure(this, fileName, lineNumber, conditionString));
+		failWith(CheckFailure(this, fileName, lineNumber, checkString, conditionString));
 }
 
 void Utest::fail(const char *text, const char* fileName, int lineNumber)

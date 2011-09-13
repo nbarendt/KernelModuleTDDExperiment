@@ -29,12 +29,11 @@
 #include "CppUTest/TestFailure.h"
 #include "CppUTest/TestOutput.h"
 #include "CppUTest/PlatformSpecificFunctions.h"
-#include <stdlib.h>
 
 SimpleString removeAllPrintableCharactersFrom(const SimpleString& str)
 {
 	size_t bufferSize = str.size()+1;
-	char* buffer = (char*) malloc(bufferSize);
+	char* buffer = (char*) PlatformSpecificMalloc(bufferSize);
 	str.copyToBuffer(buffer, bufferSize);
 
 	for (size_t i = 0; i < bufferSize-1; i++)
@@ -42,20 +41,20 @@ SimpleString removeAllPrintableCharactersFrom(const SimpleString& str)
 			buffer[i] = ' ';
 
 	SimpleString result(buffer);
-	free(buffer);
+	PlatformSpecificFree(buffer);
 	return result;
 }
 
 SimpleString addMarkerToString(const SimpleString& str, int markerPos)
 {
 	size_t bufferSize = str.size()+1;
-	char* buffer = (char*) malloc(bufferSize);
+	char* buffer = (char*) PlatformSpecificMalloc(bufferSize);
 	str.copyToBuffer(buffer, bufferSize);
 
 	buffer[markerPos] = '^';
 
 	SimpleString result(buffer);
-	free(buffer);
+	PlatformSpecificFree(buffer);
 	return result;
 
 }
@@ -199,9 +198,10 @@ ContainsFailure::ContainsFailure(Utest* test, const char* fileName, int lineNumb
 	message_ = StringFromFormat(format, actual.asCharString(), expected.asCharString());
 }
 
-CheckFailure::CheckFailure(Utest* test, const char* fileName, int lineNumber, const SimpleString& conditionString) : TestFailure(test, fileName, lineNumber)
+CheckFailure::CheckFailure(Utest* test, const char* fileName, int lineNumber, const SimpleString& checkString, const SimpleString& conditionString) : TestFailure(test, fileName, lineNumber)
 {
-	message_ = "CHECK(";
+	message_ = checkString;
+	message_ += "(";
 	message_ += conditionString;
 	message_ += ") failed";
 }

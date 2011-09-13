@@ -19,6 +19,7 @@ int tddmodule_setup_cdev(void)
     cdev_init(&tddmodule_dev.cdev, &tddmodule_fops);
     tddmodule_dev.cdev.ops = &tddmodule_fops;
     cdev_add(&tddmodule_dev.cdev, tddmodule_first_dev, TDDMODULE_DEV_COUNT); 
+    return 0;
 }
 
 int tddmodule_init(void)

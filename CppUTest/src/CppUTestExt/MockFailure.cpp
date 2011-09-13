@@ -52,7 +52,7 @@ void MockFailure::addExpectationsAndCallHistory(const MockExpectedFunctionsList&
 {
 	message_ += "\tEXPECTED calls that did NOT happen:\n";
 	message_ += expectations.unfulfilledFunctionsToString("\t\t");
-	message_ += "\n\tACTUAL calls that did happen:\n";
+	message_ += "\n\tACTUAL calls that did happen (in call order):\n";
 	message_ += expectations.fulfilledFunctionsToString("\t\t");
 }
 
@@ -89,6 +89,13 @@ MockUnexpectedCallHappenedFailure::MockUnexpectedCallHappenedFailure(Utest* test
 	else
 		message_ = "Mock Failure: Unexpected call to function: ";
 	message_ += name;
+	message_ += "\n";
+	addExpectationsAndCallHistory(expectations);
+}
+
+MockCallOrderFailure::MockCallOrderFailure(Utest* test, const MockExpectedFunctionsList& expectations) : MockFailure(test)
+{
+	message_ = "Mock Failure: Out of order calls";
 	message_ += "\n";
 	addExpectationsAndCallHistory(expectations);
 }

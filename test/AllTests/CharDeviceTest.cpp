@@ -38,8 +38,7 @@ TEST(CharDeviceTest, ModuleInitAllocatesDevRegion)
         .withParameterOfType("unsigned", "count", &expected_count)
         .withParameter("name", "tddmodule")
         .andReturnValue(0);
-    mock(fs_mock_namespace).expectOneCall("cdev_init").ignoreOtherParameters();
-    mock(fs_mock_namespace).expectOneCall("cdev_add").ignoreOtherParameters();
+    mock(fs_mock_namespace).ignoreOtherCalls();
     CHECK_EQUAL(0, initialize_module()); 
 }
 

@@ -148,8 +148,6 @@ TEST(MemoryLeakDetectorTest, OneLeak)
 	LONGS_EQUAL(0, newAllocator->free_called);
 }
 
-#include <stdio.h>
-
 TEST(MemoryLeakDetectorTest, OneHundredLeaks)
 {
 	const int amount_alloc = 100;
@@ -461,6 +459,20 @@ TEST(MemoryLeakDetectorTest, allocateWithANullAllocatorCausesNoProblems)
 	detector->deallocMemory(NullUnknownAllocator::defaultAllocator(), mem);
 }
 
+TEST(MemoryLeakDetectorTest, invalidateMemory)
+{
+  unsigned char* mem = (unsigned char*)detector->allocMemory(mallocAllocator, 2);
+
+  detector->invalidateMemory((char*)mem);
+  CHECK(mem[0] == 0xCD);
+  CHECK(mem[1] == 0xCD);
+  detector->deallocMemory(mallocAllocator, mem);
+}
+
+TEST(MemoryLeakDetectorTest, invalidateMemoryNULLShouldWork)
+{
+  detector->invalidateMemory(NULL);
+}
 
 TEST_GROUP(SimpleStringBuffer)
 {
