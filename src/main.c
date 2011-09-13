@@ -16,9 +16,15 @@ int tddmodule_dev_open (struct inode *inode, struct file *filp)
     return 0;
 }
 
+int tddmodule_dev_release (struct inode *inode, struct file *filp)
+{
+    return 0;
+}
+
 
 struct file_operations tddmodule_fops = {
     .open = tddmodule_dev_open,    
+    .release = tddmodule_dev_release,
 };
 
 
