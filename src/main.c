@@ -2,6 +2,14 @@
 #include <linux/module.h>
 #include <linux/printk.h>
 #include <linux/fs.h>
+#include <asm/io.h>
+#include <linux/kernel.h>
+
+#ifndef __KERNEL__
+
+#include <assert.h>
+
+#endif
 
 #include "main_private.h"
 
@@ -9,10 +17,15 @@
 
 dev_t tddmodule_first_dev;
 tddmodule_dev_t tddmodule_dev;
+tddmodule_registers_t *tddmodule_registers_p = NULL;
 
 int tddmodule_dev_open (struct inode *inode, struct file *filp)
 {
     filp->private_data = &tddmodule_dev;
+    iowrite32(TDDMODULE_DEV_CONTROL_RESET, &tddmodule_registers_p->control);
+    mb();
+    while(!ioread32(&tddmodule_registers_p->status)){
+    }
     return 0;
 }
 
@@ -47,6 +60,11 @@ int tddmodule_init(void)
         goto exit1;
     if(tddmodule_setup_cdev())
         goto exit2;
+
+#ifndef __KERNEL__
+    tddmodule_registers_p = calloc(1, sizeof(tddmodule_registers_t));
+    assert(tddmodule_registers_p);
+#endif
     return 0;
 exit2:
     unregister_chrdev_region(tddmodule_first_dev, TDDMODULE_DEV_COUNT);
@@ -56,6 +74,10 @@ exit1:
 
 void tddmodule_exit(void)
 {
+#ifndef __KERNEL__
+    free(tddmodule_registers_p);
+    tddmodule_registers_p = NULL;
+#endif
     unregister_chrdev_region(tddmodule_first_dev, TDDMODULE_DEV_COUNT);
 }
 
