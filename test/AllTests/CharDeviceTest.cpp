@@ -38,6 +38,8 @@ TEST(CharDeviceTest, ModuleInitAllocatesDevRegion)
         .withParameterOfType("unsigned", "count", &expected_count)
         .withParameter("name", "tddmodule")
         .andReturnValue(0);
+    mock(fs_mock_namespace).expectOneCall("cdev_init").ignoreOtherParameters();
+    mock(fs_mock_namespace).expectOneCall("cdev_add").ignoreOtherParameters();
     CHECK_EQUAL(0, initialize_module()); 
 }
 
@@ -74,6 +76,14 @@ TEST_GROUP(SetupDevStructTest)
 
     void teardown() {
     }
+
+    int initialize_module() {
+        return __inittest()();
+    }
+
+    void cleanup_module() {
+        __exittest()();
+    }
 };
 
 TEST(SetupDevStructTest, setup_cdev_calls_cdev_init)
@@ -107,3 +117,13 @@ TEST(SetupDevStructTest, setup_cdev_calls_cdev_add)
         .withParameterOfType("unsigned", "count", &expected_count);
     tddmodule_setup_cdev();
 }
+
+TEST(SetupDevStructTest, ModuleInitInitializes_cdev)
+{
+    tddmodule_dev.cdev.ops = NULL;
+    mock().ignoreOtherCalls();
+    initialize_module();
+    CHECK_EQUAL( &tddmodule_fops, tddmodule_dev.cdev.ops);
+}
+
+// error handling when setup_cdev fails (e.g., unregister)
