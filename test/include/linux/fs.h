@@ -5,10 +5,14 @@ struct file {
 	void			*private_data;
 };
 
+struct inode {
+};
 
 struct file_operations {
 	struct module *owner;
+	int (*open) (struct inode *, struct file *);
 };
+
 
 
 extern int alloc_chrdev_region(dev_t *dev, unsigned    baseminor,

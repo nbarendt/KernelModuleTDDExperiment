@@ -9,9 +9,18 @@
 
 dev_t tddmodule_first_dev;
 tddmodule_dev_t tddmodule_dev;
+
+int tddmodule_dev_open (struct inode *inode, struct file *filp)
+{
+    filp->private_data = &tddmodule_dev;
+    return 0;
+}
+
+
 struct file_operations tddmodule_fops = {
-    
+    .open = tddmodule_dev_open,    
 };
+
 
 
 int tddmodule_setup_cdev(void)
@@ -34,6 +43,7 @@ int tddmodule_init(void)
         goto exit2;
     return 0;
 exit2:
+    unregister_chrdev_region(tddmodule_first_dev, TDDMODULE_DEV_COUNT);
 exit1:
     return 1;
 }
