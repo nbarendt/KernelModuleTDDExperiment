@@ -14,6 +14,7 @@ int tddmodule_init(void);
 void tddmodule_exit(void);
 
 int tddmodule_dev_open (struct inode *inode, struct file *filp);
+int tddmodule_dev_release (struct inode *inode, struct file *filp);
 
 extern dev_t tddmodule_first_dev;
 extern tddmodule_dev_t tddmodule_dev; 

@@ -11,6 +11,7 @@ struct inode {
 struct file_operations {
 	struct module *owner;
 	int (*open) (struct inode *, struct file *);
+	int (*release) (struct inode *, struct file *);
 };
 
 
