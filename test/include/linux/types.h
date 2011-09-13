@@ -1,6 +1,14 @@
 #ifndef _LINUX_TYPES_H
 #define _LINUX_TYPES_H
 
+struct list_head {
+	struct list_head *next, *prev;
+};
+
+typedef struct {
+	int counter;
+} atomic_t;
+
 
 #endif
 // copy from 2.6.38-11 - comment out everything with #ifdef

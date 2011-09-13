@@ -1,6 +1,16 @@
 #ifndef _LINUX_FS_H
 #define _LINUX_FS_H
 
+struct file {
+	void			*private_data;
+};
+
+
+struct file_operations {
+	struct module *owner;
+};
+
+
 extern int alloc_chrdev_region(dev_t *dev, unsigned    baseminor,
     unsigned    count,
     const char *    name);
