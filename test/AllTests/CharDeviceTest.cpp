@@ -33,6 +33,8 @@ TEST(CharDeviceTest, ModuleInitAllocatesDevRegion)
     unsigned expected_baseminor = 0;
     unsigned expected_count = 1;
 
+    EXPECT_N_LEAKS(1);
+
     mock(fs_mock_namespace).expectOneCall("alloc_chrdev_region")
         .withParameterOfType("unsigned", "baseminor", &expected_baseminor)
         .withParameterOfType("unsigned", "count", &expected_count)
@@ -69,6 +71,7 @@ TEST(CharDeviceTest, ModuleExitReleasesDevRegion)
 // test a side-effect of module initialization calling tddmodule_setup_cdev()
 TEST(CharDeviceTest, ModuleInitInitializes_cdev)
 {
+    EXPECT_N_LEAKS(1);
     tddmodule_dev.cdev.ops = NULL;
     mock().ignoreOtherCalls();
     initialize_module();

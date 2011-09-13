@@ -33,6 +33,7 @@ TEST(ModuleRegistration, ModuleRegistersExit)
 
 TEST(ModuleRegistration, ModuleSendsDebugHelloWorld)
 {
+    EXPECT_N_LEAKS(1);
     __inittest()();
     STRCMP_EQUAL("<7>Hello, World!", printkSpy_get_next());
 }

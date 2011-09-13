@@ -19,6 +19,7 @@ TEST_GROUP(LoggingTest)
 
 TEST(LoggingTest, ModuleInitGeneratesMessage)
 {
+    EXPECT_N_LEAKS(1);
     tddmodule_init();
             
 }
